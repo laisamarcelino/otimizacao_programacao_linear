@@ -5,7 +5,7 @@ LDFLAGS =
 TARGET  = comprimidos
 OBJS    = main.o problem.o
 ROOT_DIR := $(notdir $(CURDIR))
-PACKAGE  = $(ROOT_DIR).tar.gz
+PACKAGE  = lsmr24.tar.gz
 
 .PHONY: all clean dist
 
@@ -21,10 +21,10 @@ problem.o: problem.c problem.h
 	$(CC) $(CFLAGS) -c problem.c -o $@
 
 clean:
-	rm -f $(OBJS) $(TARGET) $(PACKAGE)
+	rm -f $(OBJS) $(TARGET)
 
 dist: clean
-	tar -C .. --exclude-vcs \
-	    --exclude='$(ROOT_DIR)/$(PACKAGE)' \
-	    -czf $(PACKAGE) $(ROOT_DIR)
-
+	tar -C $(CURDIR) --exclude-vcs \
+	    --exclude='$(PACKAGE)' \
+	    -czf /tmp/$(PACKAGE) .
+	mv /tmp/$(PACKAGE) $(PACKAGE)
