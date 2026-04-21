@@ -4,7 +4,8 @@ CFLAGS  = -Wall -Wextra -Wpedantic -std=c11 -O2
 TARGET  = comprimidos
 OBJS    = main.o problem.o
 ROOT_DIR := $(notdir $(CURDIR))
-PACKAGE  = lsmr24.tar.gz
+DIST_DIR = lmsr24
+PACKAGE  = $(DIST_DIR).tar.gz
 
 .PHONY: all clean dist
 
@@ -23,7 +24,8 @@ clean:
 	rm -f $(OBJS) $(TARGET)
 
 dist: clean
-	tar -C $(CURDIR) --exclude-vcs \
-	    --exclude='$(PACKAGE)' \
-	    -czf /tmp/$(PACKAGE) .
+	tar -C $(CURDIR)/.. --exclude-vcs \
+	    --exclude='$(ROOT_DIR)/$(PACKAGE)' \
+	    --transform='s,^$(ROOT_DIR),$(DIST_DIR),' \
+	    -czf /tmp/$(PACKAGE) $(ROOT_DIR)
 	mv /tmp/$(PACKAGE) $(PACKAGE)
