@@ -1,6 +1,5 @@
 CC      = gcc
 CFLAGS  = -Wall -Wextra -Wpedantic -std=c11 -O2
-LDFLAGS =
 
 TARGET  = comprimidos
 OBJS    = main.o problem.o

@@ -5,12 +5,7 @@
 static void zerar_instancia(Instancia *inst) {
     if (inst == NULL) return;
 
-    inst->c = 0;
-    inst->p = 0;
-    inst->k = 0;
-    inst->q = NULL;
-    inst->comps = NULL;
-    inst->restr = NULL;
+    *inst = (Instancia) {0};
 }
 
 static void limpar_instancia(Instancia *inst) {
@@ -29,12 +24,7 @@ static void limpar_instancia(Instancia *inst) {
     free(inst->q);
     free(inst->restr);
 
-    inst->comps = NULL;
-    inst->q = NULL;
-    inst->restr = NULL;
-    inst->c = 0;
-    inst->p = 0;
-    inst->k = 0;
+    zerar_instancia(inst);
 }
 
 static int ler_vetor(FILE *in, int *valores, int quantidade) {
@@ -116,6 +106,26 @@ static void imprimir_termo(FILE *out, int coef, int var_index, int primeiro) {
     }
 }
 
+static void imprimir_soma_componente(FILE *out, const Instancia *inst, int componente) {
+    int i;
+    int primeiro = 1;
+
+    for (i = 0; i < inst->p; i++) {
+        int coef = inst->comps[i].comp[componente];
+
+        if (coef == 0) {
+            continue;
+        }
+
+        imprimir_termo(out, coef, i + 1, primeiro);
+        primeiro = 0;
+    }
+
+    if (primeiro) {
+        fprintf(out, "0");
+    }
+}
+
 static void imprimir_objetivo(FILE *out, const Instancia *inst) {
     int i;
     int primeiro = 1;
@@ -141,28 +151,11 @@ static void imprimir_objetivo(FILE *out, const Instancia *inst) {
 }
 
 static void imprimir_restricoes_minimas(FILE *out, const Instancia *inst) {
-    int i;
     int j;
 
     /* Cada componente deve atingir a quantidade diária mínima exigida. */
     for (j = 0; j < inst->c; j++) {
-        int primeiro = 1;
-
-        for (i = 0; i < inst->p; i++) {
-            int coef = inst->comps[i].comp[j];
-
-            if (coef == 0) {
-                continue;
-            }
-
-            imprimir_termo(out, coef, i + 1, primeiro);
-            primeiro = 0;
-        }
-
-        if (primeiro) {
-            fprintf(out, "0");
-        }
-
+        imprimir_soma_componente(out, inst, j);
         fprintf(out, " >= %d;\n", inst->q[j]);
     }
 
@@ -170,28 +163,11 @@ static void imprimir_restricoes_minimas(FILE *out, const Instancia *inst) {
 }
 
 static void imprimir_restricoes_limite(FILE *out, const Instancia *inst) {
-    int i;
     int t;
 
     for (t = 0; t < inst->k; t++) {
         int comp_idx = inst->restr[t].componente - 1;
-        int primeiro = 1;
-
-        for (i = 0; i < inst->p; i++) {
-            int coef = inst->comps[i].comp[comp_idx];
-
-            if (coef == 0) {
-                continue;
-            }
-
-            imprimir_termo(out, coef, i + 1, primeiro);
-            primeiro = 0;
-        }
-
-        if (primeiro) {
-            fprintf(out, "0");
-        }
-
+        imprimir_soma_componente(out, inst, comp_idx);
         fprintf(out, " <= %d;\n", inst->restr[t].limite);
     }
 
